@@ -68,28 +68,36 @@ export default function LandingPage() {
   const components = pageConfig.components as ComponentConfig[];
 
   return (
-    <main>
+    <main style={{ fontFamily: 'var(--font)' }}>
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-raptive-purple flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(8px)',
+        borderBottom: '1px solid var(--warm-grey)',
+        padding: '0 32px',
+      }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--purple-0)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: 'white', fontWeight: 700, fontSize: 14 }}>R</span>
             </div>
-            <span className="font-bold text-gray-900 text-lg">Raptive</span>
+            <span style={{ fontWeight: 600, fontSize: 16, color: 'var(--text)' }}>Raptive</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm text-gray-600">
-            <a href="#" className="hover:text-gray-900 transition-colors">Creators</a>
-            <a href="#" className="hover:text-gray-900 transition-colors">Advertisers</a>
-            <a href="#" className="hover:text-gray-900 transition-colors">About</a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32, fontSize: 14, color: 'var(--muted)' }} className="nav-links">
+            <a href="#" style={{ textDecoration: 'none', color: 'var(--muted)' }}>Creators</a>
+            <a href="#" style={{ textDecoration: 'none', color: 'var(--muted)' }}>Advertisers</a>
+            <a href="#" style={{ textDecoration: 'none', color: 'var(--muted)' }}>About</a>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900 hidden sm:inline">
-              Login
-            </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <a href="#" style={{ fontSize: 14, color: 'var(--muted)', textDecoration: 'none', fontWeight: 300 }}>Login</a>
             <a
               href="https://dashboard.raptive.com/apply/site-info"
-              className="px-4 py-2 bg-raptive-purple text-white text-sm font-semibold rounded-lg hover:bg-raptive-purple-dark transition-colors"
+              style={{
+                fontSize: 13, fontWeight: 700, color: 'var(--black)',
+                background: 'var(--yellow)', padding: '8px 20px',
+                borderRadius: 999, textDecoration: 'none',
+                transition: 'background 0.2s, color 0.2s',
+              }}
             >
               Apply now
             </a>
@@ -98,28 +106,13 @@ export default function LandingPage() {
       </nav>
 
       {/* Page top padding for fixed nav */}
-      <div className="h-16" />
+      <div style={{ height: 60 }} />
 
       {/* Render components from page-config.json */}
       {components.map((component, i) => renderComponent(component, i))}
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-raptive-purple flex items-center justify-center">
-              <span className="text-white font-bold text-xs">R</span>
-            </div>
-            <span className="text-white font-semibold">Raptive</span>
-          </div>
-          <p className="text-sm">© {new Date().getFullYear()} Raptive. All rights reserved.</p>
-          <div className="flex gap-6 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
-          </div>
-        </div>
-      </footer>
+      {/* Spacer so BottomCTA footer doesn't need a separate footer tag */}
+      </div>
     </main>
   );
 }

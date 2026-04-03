@@ -14,41 +14,84 @@ export function BottomCTA({ headline, ctaText }: BottomCTAProps) {
   }
 
   return (
-    <section className="py-24 px-6 bg-white">
-      <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-          {headline}
-        </h2>
-        <p className="text-gray-500 text-lg mb-10 max-w-xl mx-auto">
-          Join thousands of independent creators who trust Raptive to grow their business. Apply in
-          under 5 minutes.
-        </p>
+    <div
+      style={{
+        background: 'var(--light-grey)',
+        borderTop: '1px solid var(--warm-grey)',
+        padding: '72px 32px 0',
+        marginTop: 80,
+        textAlign: 'center',
+      }}
+    >
+      <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--purple-0)', display: 'block', marginBottom: 14 }}>
+        Free. Immediate. No commitment.
+      </span>
 
-        <button
-          onClick={handleCTA}
-          className="px-10 py-5 bg-raptive-purple text-white font-bold text-xl rounded-xl hover:bg-raptive-purple-dark transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-        >
-          {ctaText}
-        </button>
+      <h2
+        style={{
+          fontSize: 'clamp(24px, 3vw, 36px)',
+          fontWeight: 300,
+          letterSpacing: '-0.02em',
+          marginBottom: 12,
+          lineHeight: 1.2,
+        }}
+        dangerouslySetInnerHTML={{
+          __html: headline.replace(
+            /(earn|grow|power|join|build|scale|start|become)/gi,
+            '<em style="color:var(--purple-0)">$1</em>'
+          ),
+        }}
+      />
 
-        <p className="text-gray-400 text-sm mt-5">
-          Free to apply · No long-term contracts · Cancel anytime
-        </p>
+      <p style={{ fontSize: 16, color: 'var(--muted)', marginBottom: 32, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', fontWeight: 300, lineHeight: 1.6 }}>
+        Built on data from the largest independent publisher network on the open web. Application takes under 5 minutes.
+      </p>
 
-        {/* Trust logos strip */}
-        <div className="mt-14 pt-8 border-t border-gray-100">
-          <p className="text-gray-300 text-xs uppercase tracking-widest mb-4 font-medium">
-            Featured in
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 opacity-30 grayscale">
-            {['Forbes', 'TechCrunch', 'AdAge', 'Digiday'].map(name => (
-              <span key={name} className="text-lg font-bold text-gray-600">
-                {name}
-              </span>
-            ))}
+      <button
+        onClick={handleCTA}
+        style={{
+          display: 'inline-block',
+          background: 'var(--yellow)',
+          color: 'var(--black)',
+          fontSize: 15,
+          fontWeight: 700,
+          fontFamily: 'var(--font)',
+          textDecoration: 'none',
+          padding: '14px 32px',
+          borderRadius: 999,
+          border: 'none',
+          cursor: 'pointer',
+          transition: 'background 0.2s, color 0.2s, transform 0.15s',
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLButtonElement).style.background = 'var(--purple-0)';
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--white)';
+          (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLButtonElement).style.background = 'var(--yellow)';
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--black)';
+          (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+        }}
+      >
+        {ctaText} →
+      </button>
+
+      {/* Footer — flush to bottom of section */}
+      <footer style={{ marginTop: 72, borderTop: '1px solid var(--warm-grey)', padding: '28px 0', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, maxWidth: 1120, marginLeft: 'auto', marginRight: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--purple-0)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: 'white', fontWeight: 700, fontSize: 13 }}>R</span>
           </div>
+          <span style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>Raptive</span>
         </div>
-      </div>
-    </section>
+        <p style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 300 }}>© {new Date().getFullYear()} Raptive. All rights reserved.</p>
+        <div style={{ display: 'flex', gap: 24 }}>
+          {['Privacy', 'Terms', 'Contact'].map(l => (
+            <a key={l} href="#" style={{ fontSize: 12, color: 'var(--muted)', textDecoration: 'none', fontWeight: 300 }}>{l}</a>
+          ))}
+        </div>
+      </footer>
+    </div>
   );
 }

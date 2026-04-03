@@ -2,39 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&display=swap');
 
-* {
-  box-sizing: border-box;
+:root {
+  --purple-0:   #6b65ff;
+  --purple-10:  #7A74FF;
+  --purple-80:  #E1E0FF;
+  --purple-90:  #F0F0FF;
+  --yellow:     #d2ff66;
+  --light-grey: #F7F7F2;
+  --warm-grey:  #e1dad4;
+  --white:      #ffffff;
+  --black:      #000000;
+  --text:       #0a0a0a;
+  --muted:      #5a5a5a;
+  --font:       'Plus Jakarta Sans', system-ui, sans-serif;
+  --radius:     12px;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font);
+  background: var(--white);
+  color: var(--text);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Slider thumb styling */
-input[type='range']::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
+/* Italic = verbs only per brand guidelines */
+em { font-style: italic; font-weight: inherit; }
 
-input[type='range']::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
+/* Slider */
+input[type='range'] { -webkit-appearance: none; appearance: none; background: var(--warm-grey); height: 4px; border-radius: 999px; width: 100%; cursor: pointer; }
+input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--purple-0); cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+input[type='range']::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--purple-0); cursor: pointer; border: none; }
+
+@media (max-width: 768px) { .nav-links { display: none !important; } }

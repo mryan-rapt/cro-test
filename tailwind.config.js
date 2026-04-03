@@ -7,16 +7,21 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        raptive: {
-          purple: '#6B21A8',
-          'purple-light': '#9333EA',
-          'purple-dark': '#4C1D95',
-          navy: '#1E1B4B',
-          gray: '#F8F7FF',
-        },
+        purple:     '#6b65ff',
+        'purple-10':'#7A74FF',
+        'purple-80':'#E1E0FF',
+        'purple-90':'#F0F0FF',
+        yellow:     '#d2ff66',
+        'light-grey':'#F7F7F2',
+        'warm-grey': '#e1dad4',
+        muted:      '#5a5a5a',
+        ink:        '#0a0a0a',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+      },
+      borderRadius: {
+        brand: '12px',
       },
     },
   },

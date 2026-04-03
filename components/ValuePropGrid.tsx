@@ -7,37 +7,51 @@ interface ValuePropGridProps {
   features: Feature[];
 }
 
-const ICONS = ['💰', '🤝', '📊', '⚡'];
-
 export function ValuePropGrid({ features }: ValuePropGridProps) {
   return (
-    <section className="py-20 px-6 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Everything you need to run a premium creator business
-          </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Raptive goes far beyond ad management. We&apos;re a full-stack growth partner for
-            independent digital creators.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, i) => (
-            <div
-              key={i}
-              className="p-6 rounded-2xl border border-gray-100 hover:border-raptive-purple/30 hover:shadow-md transition-all group"
-            >
-              <div className="text-3xl mb-4">{ICONS[i % ICONS.length]}</div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-raptive-purple transition-colors">
-                {feature.title}
-              </h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
-            </div>
-          ))}
-        </div>
+    <section style={{ maxWidth: 1120, margin: '80px auto 0', padding: '0 32px' }}>
+      <div style={{ marginBottom: 36 }}>
+        <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--purple-0)', display: 'block', marginBottom: 14 }}>
+          What you get
+        </span>
+        <h2 style={{ fontSize: 'clamp(24px, 3vw, 34px)', fontWeight: 300, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+          Four reasons creators choose Raptive
+        </h2>
       </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: 2,
+          background: 'var(--warm-grey)',
+          borderRadius: 'var(--radius)',
+          overflow: 'hidden',
+        }}
+        className="vp-grid"
+      >
+        {features.map((f, i) => (
+          <div
+            key={i}
+            style={{ background: 'var(--white)', padding: '32px 28px' }}
+          >
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 12 }}>
+              {String(i + 1).padStart(2, '0')}
+            </div>
+            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 10, lineHeight: 1.3 }}>
+              {f.title}
+            </div>
+            <div style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6, fontWeight: 300 }}>
+              {f.description}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <style>{`
+        @media (max-width: 960px) { .vp-grid { grid-template-columns: 1fr !important; } }
+        @media (max-width: 580px) { .vp-grid { margin: 0 -20px !important; border-radius: 0 !important; } }
+      `}</style>
     </section>
   );
 }

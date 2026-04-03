@@ -7,20 +7,12 @@ interface RevenueCalculatorProps {
   sliderPrompt: string;
 }
 
-// RPM estimate table based on niche/pageviews
-const RPM_ESTIMATE = 12; // Conservative avg RPM in USD for Raptive creators
-const RPM_UPLIFT = 1.4;  // 40% uplift vs generic networks
+const RPM = 12;
+const UPLIFT = 1.4;
 
 export function RevenueCalculator({ sliderPrompt }: RevenueCalculatorProps) {
   const [pageviews, setPageviews] = useState(500000);
   const [interacted, setInteracted] = useState(false);
-
-  const formatNum = (n: number) =>
-    n >= 1_000_000
-      ? `${(n / 1_000_000).toFixed(1)}M`
-      : n >= 1_000
-      ? `${Math.round(n / 1_000)}K`
-      : `${n}`;
 
   function handleSlider(val: number) {
     setPageviews(val);
@@ -30,62 +22,112 @@ export function RevenueCalculator({ sliderPrompt }: RevenueCalculatorProps) {
     }
   }
 
-  const baseRevenue = (pageviews / 1000) * RPM_ESTIMATE;
-  const raptiveRevenue = baseRevenue * RPM_UPLIFT;
-  const uplift = raptiveRevenue - baseRevenue;
-
   const fmt = (n: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
+  const fmtPv = (n: number) =>
+    n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : `${Math.round(n / 1000)}K`;
+
+  const base = (pageviews / 1000) * RPM;
+  const raptive = base * UPLIFT;
+  const uplift = raptive - base;
+
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-raptive-navy to-raptive-purple-dark">
-      <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-          See your earning potential
-        </h2>
-        <p className="text-white/60 text-lg mb-12">
-          Estimate how much more you could earn with Raptive&apos;s premium ad stack.
-        </p>
+    <section style={{ maxWidth: 1120, margin: '80px auto 0', padding: '0 32px 0' }}>
+      <div
+        style={{
+          background: 'var(--light-grey)',
+          borderRadius: 20,
+          border: '1px solid var(--warm-grey)',
+          padding: '56px 48px',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 64,
+          alignItems: 'center',
+        }}
+        className="calc-grid"
+      >
+        {/* Left */}
+        <div>
+          <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--purple-0)', display: 'block', marginBottom: 14 }}>
+            Revenue estimate
+          </span>
+          <h2 style={{ fontSize: 'clamp(24px, 3vw, 34px)', fontWeight: 300, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
+            {sliderPrompt}
+          </h2>
+          <p style={{ fontSize: 15, color: 'var(--muted)', fontWeight: 300, lineHeight: 1.6, marginBottom: 36 }}>
+            Based on average RPM data across 6,500+ Raptive creator sites. Your results will vary based on niche, audience, and content quality.
+          </p>
 
-        <div className="bg-white/10 border border-white/20 rounded-2xl p-8 backdrop-blur-sm">
-          <label className="block text-white font-semibold text-lg mb-6">{sliderPrompt}</label>
-
-          <div className="mb-8">
-            <div className="text-3xl font-bold text-white mb-4">{formatNum(pageviews)} pageviews/mo</div>
-            <input
-              type="range"
-              min={50000}
-              max={10000000}
-              step={50000}
-              value={pageviews}
-              onChange={e => handleSlider(Number(e.target.value))}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer accent-white"
-            />
-            <div className="flex justify-between text-white/40 text-xs mt-2">
-              <span>50K</span>
-              <span>10M</span>
-            </div>
+          <label style={{ display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 12 }}>
+            Monthly pageviews
+          </label>
+          <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--purple-0)', marginBottom: 16 }}>
+            {fmtPv(pageviews)}
           </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-              <p className="text-white/50 text-sm mb-1">Without Raptive</p>
-              <p className="text-2xl font-bold text-white/60">{fmt(baseRevenue)}<span className="text-sm font-normal text-white/40">/mo</span></p>
-            </div>
-            <div className="bg-white rounded-xl p-4">
-              <p className="text-raptive-purple text-sm font-medium mb-1">With Raptive</p>
-              <p className="text-2xl font-bold text-raptive-purple">{fmt(raptiveRevenue)}<span className="text-sm font-normal text-raptive-purple/60">/mo</span></p>
-            </div>
-          </div>
-
-          <div className="bg-green-500/20 border border-green-400/30 rounded-xl p-4">
-            <p className="text-green-300 font-semibold text-lg">
-              +{fmt(uplift)}/month potential uplift
-            </p>
-            <p className="text-green-400/70 text-sm mt-1">Based on 40% avg RPM improvement across our network</p>
+          <input
+            type="range"
+            min={50000}
+            max={10000000}
+            step={50000}
+            value={pageviews}
+            onChange={e => handleSlider(Number(e.target.value))}
+            style={{ marginBottom: 8 }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--muted)', fontWeight: 300 }}>
+            <span>50K</span><span>10M</span>
           </div>
         </div>
+
+        {/* Right */}
+        <div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 2,
+              background: 'var(--warm-grey)',
+              borderRadius: 'var(--radius)',
+              overflow: 'hidden',
+              marginBottom: 12,
+            }}
+          >
+            <div style={{ background: 'var(--white)', padding: '22px 20px' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 8 }}>
+                Other networks
+              </div>
+              <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--muted)', lineHeight: 1 }}>
+                {fmt(base)}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 300, marginTop: 4 }}>/month</div>
+            </div>
+            <div style={{ background: 'var(--purple-90)', padding: '22px 20px', border: '1px solid var(--purple-80)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--purple-0)', marginBottom: 8 }}>
+                With Raptive
+              </div>
+              <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--purple-0)', lineHeight: 1 }}>
+                {fmt(raptive)}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 300, marginTop: 4 }}>/month</div>
+            </div>
+          </div>
+
+          <div style={{ background: 'var(--yellow)', borderRadius: 'var(--radius)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--black)' }}>Potential uplift</span>
+            <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--black)' }}>+{fmt(uplift)}/mo</span>
+          </div>
+
+          <p style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 300, marginTop: 12, lineHeight: 1.5 }}>
+            Based on 40% average RPM improvement across our network. Estimates are illustrative — actual results depend on niche, content quality, and audience.
+          </p>
+        </div>
       </div>
+
+      <style>{`
+        .calc-grid { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 960px) { .calc-grid { grid-template-columns: 1fr !important; gap: 40px !important; padding: 40px 32px !important; } }
+        @media (max-width: 580px) { .calc-grid { padding: 32px 24px !important; } }
+      `}</style>
     </section>
   );
 }
