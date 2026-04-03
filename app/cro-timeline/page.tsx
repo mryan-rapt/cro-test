@@ -40,14 +40,15 @@ function MetricBadge({ label, value, highlight }: { label: string; value: string
 }
 
 function ScreenshotFrame({ url, label }: { url: string; label: string }) {
-  if (!url || url.includes('placeholder')) {
+  const isValid = url && url.startsWith('/screenshots/');
+
+  if (!isValid) {
     return (
-      <div className="w-full aspect-video bg-gradient-to-br from-purple-900 to-purple-700 rounded-xl flex items-center justify-center">
-        <div className="text-center text-white/60">
-          <div className="text-4xl mb-2">🖥️</div>
-          <div className="text-sm font-medium">{label}</div>
-          <div className="text-xs mt-1 opacity-60">Screenshot pending</div>
-        </div>
+      <div style={{ width: '100%', aspectRatio: '16/9', background: 'var(--purple-90)', border: '1px solid var(--purple-80)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8 }}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--purple-0)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+        </svg>
+        <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 300 }}>{label} — screenshot pending</div>
       </div>
     );
   }
@@ -57,7 +58,7 @@ function ScreenshotFrame({ url, label }: { url: string; label: string }) {
     <img
       src={url}
       alt={label}
-      className="w-full aspect-video object-cover object-top rounded-xl border border-gray-200 shadow-sm"
+      style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', objectPosition: 'top', borderRadius: 12, border: '1px solid var(--warm-grey)', display: 'block' }}
     />
   );
 }

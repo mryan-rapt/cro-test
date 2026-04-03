@@ -2,57 +2,55 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchYesterdayMetrics } from '@/lib/posthog';
 import { runCROEngine, type PageConfig } from '@/lib/cro-engine';
 import { getFile, commitMultipleFiles } from '@/lib/github';
-import { takeScreenshot } from '@/lib/screenshot';
+import { captureScreenshotBase64 } from '@/lib/screenshot';
 
-export const maxDuration = 60; // 60 seconds (Vercel Pro max for cron)
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  // Verify Vercel cron secret
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
-
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
   return runCROCycle();
 }
 
-// Also allow POST for manual triggers (from /api/run-cro)
 export async function POST() {
   return runCROCycle();
 }
 
 async function runCROCycle() {
   const startTime = Date.now();
-  const siteUrl = process.env.SITE_URL || 'https://cro-test.vercel.app';
+  const siteUrl = process.env.SITE_URL || 'https://cro-test-ashy.vercel.app';
 
   try {
-    console.log('[CRO] Starting daily cycle...');
+    console.log('[CRO] Starting cycle...');
 
     // 1. Fetch PostHog metrics
     const metrics = await fetchYesterdayMetrics();
-    console.log('[CRO] Metrics:', JSON.stringify(metrics));
+    console.log('[CRO] Metrics fetched, isMock:', metrics.isMockData);
 
-    // 2. Get current page config from GitHub
-    const configFile = await getFile('page-config.json');
+    // 2. Load current config + timeline from GitHub
+    const [configFile, timelineFile] = await Promise.all([
+      getFile('page-config.json'),
+      getFile('cro-timeline.json'),
+    ]);
     const currentConfig: PageConfig = JSON.parse(configFile.content);
+    const timeline: object[] = JSON.parse(timelineFile.content);
 
-    // 3. Take BEFORE screenshot
-    console.log('[CRO] Taking before screenshot...');
-    const beforeScreenshot = await takeScreenshot(siteUrl, `before-v${currentConfig.version}`);
+    // 3. Take BEFORE screenshot (raw bytes → base64)
+    console.log('[CRO] Capturing before screenshot...');
+    const beforeBase64 = await captureScreenshotBase64(siteUrl);
+    const entryId = `run-${Date.now()}`;
+    const beforePath = `public/screenshots/${entryId}-before.jpg`;
+    const beforeUrl = beforeBase64 ? `/screenshots/${entryId}-before.jpg` : '';
 
     // 4. Run CRO engine
     const decision = runCROEngine(metrics, currentConfig);
     console.log('[CRO] Decision:', decision.gitCommit);
 
-    // 5. Get current timeline
-    const timelineFile = await getFile('cro-timeline.json');
-    const timeline = JSON.parse(timelineFile.content);
-
-    // 6. Build timeline entry (without after screenshot yet)
-    const entryId = `run-${Date.now()}`;
+    // 5. Build timeline entry
     const newEntry = {
       id: entryId,
       timestamp: new Date().toISOString(),
@@ -64,57 +62,53 @@ async function runCROCycle() {
       changedElement: decision.changedElement,
       gitCommit: decision.gitCommit,
       commitSha: '',
-      beforeScreenshotUrl: beforeScreenshot,
+      beforeScreenshotUrl: beforeUrl,
       afterScreenshotUrl: '',
     };
 
     const updatedTimeline = [...timeline, newEntry];
 
-    // 7. Commit both files atomically
-    const commitSha = await commitMultipleFiles(
-      [
-        {
-          path: 'page-config.json',
-          content: JSON.stringify(decision.newConfig, null, 2),
-        },
-        {
-          path: 'cro-timeline.json',
-          content: JSON.stringify(updatedTimeline, null, 2),
-        },
-      ],
-      decision.gitCommit
-    );
+    // 6. Commit: page-config + timeline + before screenshot (all atomic)
+    const filesToCommit: Array<{ path: string; content: string; encoding?: 'utf-8' | 'base64' }> = [
+      { path: 'page-config.json', content: JSON.stringify(decision.newConfig, null, 2) },
+      { path: 'cro-timeline.json', content: JSON.stringify(updatedTimeline, null, 2) },
+    ];
+    if (beforeBase64) {
+      filesToCommit.push({ path: beforePath, content: beforeBase64, encoding: 'base64' });
+    }
 
+    const commitSha = await commitMultipleFiles(filesToCommit, decision.gitCommit);
     console.log('[CRO] Committed:', commitSha);
 
-    // 8. Wait for Vercel to deploy (give it ~45 seconds)
-    // In production, Vercel typically deploys in 30-60s after a GitHub push
+    // 7. Wait for Vercel to deploy the new page-config
     await new Promise(resolve => setTimeout(resolve, 45000));
 
-    // 9. Take AFTER screenshot
-    console.log('[CRO] Taking after screenshot...');
-    const afterScreenshot = await takeScreenshot(siteUrl, `after-v${decision.newConfig.version}`);
+    // 8. Take AFTER screenshot
+    console.log('[CRO] Capturing after screenshot...');
+    const afterBase64 = await captureScreenshotBase64(siteUrl);
+    const afterPath = `public/screenshots/${entryId}-after.jpg`;
+    const afterUrl = afterBase64 ? `/screenshots/${entryId}-after.jpg` : '';
 
-    // 10. Update timeline entry with commitSha + after screenshot
-    const finalEntry = { ...newEntry, commitSha, afterScreenshotUrl: afterScreenshot };
-    const finalTimeline = updatedTimeline.map(e => (e.id === entryId ? finalEntry : e));
+    // 9. Update timeline entry with commitSha + after screenshot URL
+    const finalEntry = { ...newEntry, commitSha, afterScreenshotUrl: afterUrl };
+    const finalTimeline = updatedTimeline.map(e =>
+      (e as { id: string }).id === entryId ? finalEntry : e
+    );
 
-    // Get fresh SHA for cro-timeline.json after the first commit
-    const freshTimelineFile = await getFile('cro-timeline.json');
+    const screenshotFiles: Array<{ path: string; content: string; encoding?: 'utf-8' | 'base64' }> = [
+      { path: 'cro-timeline.json', content: JSON.stringify(finalTimeline, null, 2) },
+    ];
+    if (afterBase64) {
+      screenshotFiles.push({ path: afterPath, content: afterBase64, encoding: 'base64' });
+    }
+
     await commitMultipleFiles(
-      [
-        {
-          path: 'cro-timeline.json',
-          content: JSON.stringify(finalTimeline, null, 2),
-        },
-      ],
+      screenshotFiles,
       `CRO: Add after-screenshot for ${decision.newConfig.activeVariant}`
     );
 
-    void freshTimelineFile; // suppress unused warning
-
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    console.log(`[CRO] Cycle complete in ${elapsed}s`);
+    console.log(`[CRO] Complete in ${elapsed}s`);
 
     return NextResponse.json({
       success: true,
@@ -125,6 +119,7 @@ async function runCROCycle() {
       hypothesis: decision.hypothesis,
       gitCommit: decision.gitCommit,
       commitSha,
+      screenshotsCapured: { before: !!beforeBase64, after: !!afterBase64 },
       metrics,
     });
   } catch (err) {

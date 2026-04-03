@@ -82,7 +82,7 @@ export async function commitFile(
 }
 
 export async function commitMultipleFiles(
-  files: Array<{ path: string; content: string }>,
+  files: Array<{ path: string; content: string; encoding?: 'utf-8' | 'base64' }>,
   message: string
 ): Promise<string> {
   const { pat, owner, repo, branch } = getConfig();
@@ -117,7 +117,7 @@ export async function commitMultipleFiles(
 
   // Create blobs for each file
   const treeItems = await Promise.all(
-    files.map(async ({ path, content }) => {
+    files.map(async ({ path, content, encoding = 'utf-8' }) => {
       const blobRes = await fetch(
         `${GITHUB_API}/repos/${owner}/${repo}/git/blobs`,
         {
@@ -127,7 +127,7 @@ export async function commitMultipleFiles(
             Accept: 'application/vnd.github.v3+json',
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ content, encoding: 'utf-8' }),
+          body: JSON.stringify({ content, encoding }),
         }
       );
       if (!blobRes.ok) throw new Error(`GitHub createBlob failed: ${blobRes.status}`);
