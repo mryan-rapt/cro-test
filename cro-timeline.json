@@ -2,7 +2,7 @@
   {
     "id": "run-1775245505746",
     "timestamp": "2026-04-03T19:45:22.187Z",
-    "status": "pending",
+    "status": "accepted",
     "variant": "hero-v3",
     "previewUrl": "https://cro-test-ashy.vercel.app/preview",
     "proposedConfig": {
@@ -101,6 +101,7 @@
     "gitCommit": "CRO: Update Hero copy to optimize Bounce Rate [hero-v3]",
     "commitSha": "",
     "beforeScreenshotUrl": "/screenshots/run-1775245505746-before.jpg",
-    "afterScreenshotUrl": "/screenshots/run-1775245505746-after.jpg"
+    "afterScreenshotUrl": "/screenshots/run-1775245505746-after.jpg",
+    "acceptedAt": "2026-04-03T19:47:30.763Z"
   }
 ]

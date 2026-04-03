@@ -1,14 +1,14 @@
 {
-  "version": 6,
-  "lastUpdated": "2026-04-03T19:27:55.075Z",
-  "activeVariant": "hero-v2",
+  "version": 7,
+  "lastUpdated": "2026-04-03T19:45:05.746Z",
+  "activeVariant": "hero-v3",
   "components": [
     {
       "type": "Hero",
       "props": {
-        "headline": "Your Content Deserves Premium Ad Revenue",
-        "subheadline": "Stop leaving money on the table. Raptive's creator network drives 40% higher RPMs than typical ad networks — with real human support behind every account.",
-        "ctaText": "See If You Qualify"
+        "headline": "Independent Creators Earn More With Raptive",
+        "subheadline": "We manage ads for 6,500+ creator websites, reaching 224 million readers monthly. Apply in minutes and see your earning potential.",
+        "ctaText": "Calculate My Revenue"
       }
     },
     {
