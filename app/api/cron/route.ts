@@ -23,15 +23,15 @@ export async function POST() {
 async function runCROCycle() {
   const startTime = Date.now();
   const siteUrl = (process.env.SITE_URL || 'https://cro-test-ashy.vercel.app').trim();
+  const previewUrl = `${siteUrl}/preview`;
 
   try {
     console.log('[CRO] Starting cycle...');
 
     // 1. Fetch PostHog metrics
     const metrics = await fetchYesterdayMetrics();
-    console.log('[CRO] Metrics fetched, isMock:', metrics.isMockData);
 
-    // 2. Load current config + timeline from GitHub
+    // 2. Load current configs from GitHub
     const [configFile, timelineFile] = await Promise.all([
       getFile('page-config.json'),
       getFile('cro-timeline.json'),
@@ -39,22 +39,51 @@ async function runCROCycle() {
     const currentConfig: PageConfig = JSON.parse(configFile.content);
     const timeline: object[] = JSON.parse(timelineFile.content);
 
-    // 3. Take BEFORE screenshot (raw bytes → base64)
+    // 3. Check if there's already a pending run — don't queue another until resolved
+    const hasPending = (timeline as Array<{ status: string }>).some(e => e.status === 'pending');
+    if (hasPending) {
+      return NextResponse.json({
+        success: false,
+        skipped: true,
+        reason: 'A pending CRO recommendation is awaiting review. Accept or reject it before the next run.',
+      });
+    }
+
+    // 4. Run CRO engine to generate proposed config
+    const decision = runCROEngine(metrics, currentConfig);
+
+    // 5. Take BEFORE screenshot (current live site)
     console.log('[CRO] Capturing before screenshot...');
-    const beforeResult: ScreenshotResult = await captureScreenshotBase64(siteUrl);
     const entryId = `run-${Date.now()}`;
+    const beforeResult: ScreenshotResult = await captureScreenshotBase64(siteUrl);
     const beforePath = `public/screenshots/${entryId}-before.jpg`;
     const beforeUrl = beforeResult.base64 ? `/screenshots/${entryId}-before.jpg` : '';
 
-    // 4. Run CRO engine
-    const decision = runCROEngine(metrics, currentConfig);
-    console.log('[CRO] Decision:', decision.gitCommit);
+    // 6. Commit proposed config to page-config-preview.json + before screenshot
+    const previewCommitFiles: Array<{ path: string; content: string; encoding?: 'utf-8' | 'base64' }> = [
+      { path: 'page-config-preview.json', content: JSON.stringify(decision.newConfig, null, 2) },
+    ];
+    if (beforeResult.base64) {
+      previewCommitFiles.push({ path: beforePath, content: beforeResult.base64, encoding: 'base64' });
+    }
+    await commitMultipleFiles(previewCommitFiles, `CRO: Publish preview for ${decision.newConfig.activeVariant}`);
+    console.log('[CRO] Preview config committed');
 
-    // 5. Build timeline entry
+    // 7. Wait for GitHub raw CDN to propagate (~5s), then screenshot /preview
+    await new Promise(resolve => setTimeout(resolve, 8000));
+    console.log('[CRO] Capturing after/preview screenshot...');
+    const afterResult: ScreenshotResult = await captureScreenshotBase64(previewUrl);
+    const afterPath = `public/screenshots/${entryId}-after.jpg`;
+    const afterUrl = afterResult.base64 ? `/screenshots/${entryId}-after.jpg` : '';
+
+    // 8. Build timeline entry with status "pending"
     const newEntry = {
       id: entryId,
       timestamp: new Date().toISOString(),
+      status: 'pending',
       variant: decision.newConfig.activeVariant,
+      previewUrl,
+      proposedConfig: decision.newConfig,
       posthog_snapshot: metrics,
       analysis: decision.analysis,
       hypothesis: decision.hypothesis,
@@ -63,49 +92,18 @@ async function runCROCycle() {
       gitCommit: decision.gitCommit,
       commitSha: '',
       beforeScreenshotUrl: beforeUrl,
-      afterScreenshotUrl: '',
+      afterScreenshotUrl: afterUrl,
     };
-
     const updatedTimeline = [...timeline, newEntry];
 
-    // 6. Commit: page-config + timeline + before screenshot (all atomic)
-    const filesToCommit: Array<{ path: string; content: string; encoding?: 'utf-8' | 'base64' }> = [
-      { path: 'page-config.json', content: JSON.stringify(decision.newConfig, null, 2) },
+    // 9. Commit: screenshots + updated timeline
+    const finalFiles: Array<{ path: string; content: string; encoding?: 'utf-8' | 'base64' }> = [
       { path: 'cro-timeline.json', content: JSON.stringify(updatedTimeline, null, 2) },
     ];
-    if (beforeResult.base64) {
-      filesToCommit.push({ path: beforePath, content: beforeResult.base64, encoding: 'base64' });
-    }
-
-    const commitSha = await commitMultipleFiles(filesToCommit, decision.gitCommit);
-    console.log('[CRO] Committed:', commitSha);
-
-    // 7. Wait for Vercel to deploy the new page-config
-    await new Promise(resolve => setTimeout(resolve, 45000));
-
-    // 8. Take AFTER screenshot
-    console.log('[CRO] Capturing after screenshot...');
-    const afterResult: ScreenshotResult = await captureScreenshotBase64(siteUrl);
-    const afterPath = `public/screenshots/${entryId}-after.jpg`;
-    const afterUrl = afterResult.base64 ? `/screenshots/${entryId}-after.jpg` : '';
-
-    // 9. Update timeline entry with commitSha + after screenshot URL
-    const finalEntry = { ...newEntry, commitSha, afterScreenshotUrl: afterUrl };
-    const finalTimeline = updatedTimeline.map(e =>
-      (e as { id: string }).id === entryId ? finalEntry : e
-    );
-
-    const screenshotFiles: Array<{ path: string; content: string; encoding?: 'utf-8' | 'base64' }> = [
-      { path: 'cro-timeline.json', content: JSON.stringify(finalTimeline, null, 2) },
-    ];
     if (afterResult.base64) {
-      screenshotFiles.push({ path: afterPath, content: afterResult.base64, encoding: 'base64' });
+      finalFiles.push({ path: afterPath, content: afterResult.base64, encoding: 'base64' });
     }
-
-    await commitMultipleFiles(
-      screenshotFiles,
-      `CRO: Add after-screenshot for ${decision.newConfig.activeVariant}`
-    );
+    const commitSha = await commitMultipleFiles(finalFiles, `CRO: Log run ${entryId} as pending review`);
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(`[CRO] Complete in ${elapsed}s`);
@@ -113,11 +111,12 @@ async function runCROCycle() {
     return NextResponse.json({
       success: true,
       elapsed: `${elapsed}s`,
+      status: 'pending_review',
       variant: decision.newConfig.activeVariant,
+      previewUrl,
       bottleneck: decision.bottleneck,
       analysis: decision.analysis,
       hypothesis: decision.hypothesis,
-      gitCommit: decision.gitCommit,
       commitSha,
       screenshots: {
         before: !!beforeResult.base64,
