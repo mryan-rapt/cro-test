@@ -1,1 +1,76 @@
-null
+{
+  "version": 8,
+  "lastUpdated": "2026-04-03T19:49:46.490Z",
+  "activeVariant": "hero-v4",
+  "components": [
+    {
+      "type": "Hero",
+      "props": {
+        "headline": "The Business Partner Every Creator Deserves",
+        "subheadline": "Premium ad management, data-driven growth tools, and a team that actually picks up the phone. Raptive powers the world's most independent creators.",
+        "ctaText": "Apply to Join"
+      }
+    },
+    {
+      "type": "ValuePropGrid",
+      "props": {
+        "features": [
+          {
+            "title": "Premium Ad Revenue",
+            "description": "Access top-tier programmatic demand and direct brand partnerships that consistently outperform generic ad networks."
+          },
+          {
+            "title": "Creator-First Support",
+            "description": "Dedicated account managers who know your niche. Real humans, real advice — no bots, no tickets."
+          },
+          {
+            "title": "Data-Driven Growth",
+            "description": "Proprietary analytics surface what content earns most and help you make smarter publishing decisions."
+          },
+          {
+            "title": "Lightning-Fast Ads",
+            "description": "Our ad tech is optimized for Core Web Vitals. Fast-loading ads mean higher RPMs and better search rankings."
+          }
+        ]
+      }
+    },
+    {
+      "type": "SocialProof",
+      "props": {
+        "quotes": [
+          {
+            "text": "Switching to Raptive was the single best business decision I made. My RPM jumped 40% in the first month.",
+            "author": "Sarah K.",
+            "site": "HomemadeHappiness.com",
+            "metric": "+40% RPM"
+          },
+          {
+            "text": "They treat you like a business partner, not just a number. The support team is genuinely incredible.",
+            "author": "Marcus T.",
+            "site": "TrailblazerOutdoors.net",
+            "metric": "224M monthly readers"
+          },
+          {
+            "text": "I finally feel like my content is working as hard as I am. Revenue is predictable and growing.",
+            "author": "Jessica L.",
+            "site": "ThriftAndThrive.co",
+            "metric": "6,500+ creator sites"
+          }
+        ]
+      }
+    },
+    {
+      "type": "RevenueCalculator",
+      "props": {
+        "sliderPrompt": "How many monthly pageviews does your site get?"
+      }
+    },
+    {
+      "type": "BottomCTA",
+      "props": {
+        "headline": "Ready to Power Your Independence?",
+        "ctaText": "Apply to Join Raptive"
+      }
+    }
+  ]
+}
