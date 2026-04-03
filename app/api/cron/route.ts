@@ -69,8 +69,9 @@ async function runCROCycle() {
     await commitMultipleFiles(previewCommitFiles, `CRO: Publish preview for ${decision.newConfig.activeVariant}`);
     console.log('[CRO] Preview config committed');
 
-    // 7. Wait for GitHub raw CDN to propagate (~5s), then screenshot /preview
-    await new Promise(resolve => setTimeout(resolve, 8000));
+    // 7. Brief pause for GitHub API consistency, then screenshot /preview
+    // (preview page fetches via GitHub API, not raw CDN, so no long wait needed)
+    await new Promise(resolve => setTimeout(resolve, 3000));
     console.log('[CRO] Capturing after/preview screenshot...');
     const afterResult: ScreenshotResult = await captureScreenshotBase64(previewUrl);
     const afterPath = `public/screenshots/${entryId}-after.jpg`;

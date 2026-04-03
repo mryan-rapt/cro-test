@@ -13,9 +13,18 @@ interface PageConfig { version: number; activeVariant: string; components: Compo
 
 async function getPreviewConfig(): Promise<PageConfig | null> {
   try {
+    // Use the GitHub API directly (not raw CDN) — bypasses the ~5min CDN cache
+    // so the preview page always reflects the latest committed config immediately
+    const pat = process.env.GITHUB_PAT;
     const res = await fetch(
-      'https://raw.githubusercontent.com/mryan-rapt/cro-test/main/page-config-preview.json',
-      { cache: 'no-store' }
+      'https://api.github.com/repos/mryan-rapt/cro-test/contents/page-config-preview.json',
+      {
+        cache: 'no-store',
+        headers: {
+          ...(pat ? { Authorization: `Bearer ${pat}` } : {}),
+          Accept: 'application/vnd.github.v3.raw',
+        },
+      }
     );
     if (!res.ok) return null;
     const data = await res.json();
