@@ -111,8 +111,6 @@ export default function LandingPage() {
       {/* Render components from page-config.json */}
       {components.map((component, i) => renderComponent(component, i))}
 
-      {/* Spacer so BottomCTA footer doesn't need a separate footer tag */}
-      </div>
     </main>
   );
 }
