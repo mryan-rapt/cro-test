@@ -25,15 +25,15 @@ export interface ScreenshotResult {
  * Takes a screenshot and returns the raw JPEG bytes as a base64 string.
  */
 export async function captureScreenshotBase64(url: string): Promise<ScreenshotResult> {
-  const accessKey = process.env.SCREENSHOT_ONE_ACCESS_KEY;
-  const secret = process.env.SCREENSHOT_ONE_SECRET;
+  const accessKey = (process.env.SCREENSHOT_ONE_ACCESS_KEY ?? '').trim();
+  const secret = (process.env.SCREENSHOT_ONE_SECRET ?? '').trim();
 
   if (!accessKey || !secret) {
     return { base64: null, error: 'SCREENSHOT_ONE credentials not set' };
   }
 
   const params: Record<string, string> = {
-    access_key: accessKey.trim(),
+    access_key: accessKey,
     url: url.trim(),
     format: 'jpg',
     viewport_width: '1280',
@@ -44,6 +44,7 @@ export async function captureScreenshotBase64(url: string): Promise<ScreenshotRe
   };
 
   const apiUrl = buildSignedUrl(params, secret);
+  console.log('[Screenshot] Requesting URL (first 200):', apiUrl.slice(0, 200));
 
   try {
     const res = await fetch(apiUrl, { method: 'GET' });
