@@ -22,7 +22,7 @@ export async function POST() {
 
 async function runCROCycle() {
   const startTime = Date.now();
-  const siteUrl = process.env.SITE_URL || 'https://cro-test-ashy.vercel.app';
+  const siteUrl = (process.env.SITE_URL || 'https://cro-test-ashy.vercel.app').trim();
 
   try {
     console.log('[CRO] Starting cycle...');

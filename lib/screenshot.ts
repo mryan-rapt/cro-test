@@ -33,8 +33,8 @@ export async function captureScreenshotBase64(url: string): Promise<ScreenshotRe
   }
 
   const params: Record<string, string> = {
-    access_key: accessKey,
-    url,
+    access_key: accessKey.trim(),
+    url: url.trim(),
     format: 'jpg',
     viewport_width: '1280',
     viewport_height: '800',
