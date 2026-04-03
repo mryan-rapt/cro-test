@@ -1,14 +1,14 @@
 {
-  "version": 3,
-  "lastUpdated": "2026-04-03T17:45:15.103Z",
-  "activeVariant": "hero-v3",
+  "version": 4,
+  "lastUpdated": "2026-04-03T19:21:53.287Z",
+  "activeVariant": "hero-v4",
   "components": [
     {
       "type": "Hero",
       "props": {
-        "headline": "Independent Creators Earn More With Raptive",
-        "subheadline": "We manage ads for 6,500+ creator websites, reaching 224 million readers monthly. Apply in minutes and see your earning potential.",
-        "ctaText": "Calculate My Revenue"
+        "headline": "The Business Partner Every Creator Deserves",
+        "subheadline": "Premium ad management, data-driven growth tools, and a team that actually picks up the phone. Raptive powers the world's most independent creators.",
+        "ctaText": "Apply to Join"
       }
     },
     {
