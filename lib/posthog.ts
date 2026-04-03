@@ -105,7 +105,7 @@ export async function fetchYesterdayMetrics(): Promise<PostHogMetrics> {
     `);
     const reached50 = Number((scrollResult[0] as number[])?.[0] ?? 0);
     const reached75 = Number((scrollResult[0] as number[])?.[1] ?? 0);
-    const scrollSessions = Number((scrollResult[0] as number[])?.[2] ?? sessions || 1);
+    const scrollSessions = Number((scrollResult[0] as number[])?.[2] ?? (sessions || 1));
     const scrollDepth50 = scrollSessions > 0 ? (reached50 / scrollSessions) * 100 : 0;
     const scrollDepth75 = scrollSessions > 0 ? (reached75 / scrollSessions) * 100 : 0;
 
