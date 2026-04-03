@@ -1,14 +1,14 @@
 {
-  "version": 5,
-  "lastUpdated": "2026-04-03T19:24:34.525Z",
-  "activeVariant": "hero-v1",
+  "version": 6,
+  "lastUpdated": "2026-04-03T19:27:55.075Z",
+  "activeVariant": "hero-v2",
   "components": [
     {
       "type": "Hero",
       "props": {
-        "headline": "Turn Your Audience Into a Premium Business",
-        "subheadline": "Raptive is the ad management partner for the world's most independent creators. Join 6,500+ sites earning more every month.",
-        "ctaText": "Apply Now"
+        "headline": "Your Content Deserves Premium Ad Revenue",
+        "subheadline": "Stop leaving money on the table. Raptive's creator network drives 40% higher RPMs than typical ad networks — with real human support behind every account.",
+        "ctaText": "See If You Qualify"
       }
     },
     {

@@ -102,5 +102,31 @@
     "commitSha": "0296aab416a70fc0e4a3b07013b69a7001839923",
     "beforeScreenshotUrl": "",
     "afterScreenshotUrl": ""
+  },
+  {
+    "id": "run-1775244475075",
+    "timestamp": "2026-04-03T19:27:55.076Z",
+    "variant": "hero-v2",
+    "posthog_snapshot": {
+      "date": "2026-04-02",
+      "sessions": 847,
+      "pageviews": 1203,
+      "bounceRate": 68.4,
+      "scrollDepth50": 31.2,
+      "scrollDepth75": 18.7,
+      "ctaClicks": 42,
+      "ctaCtr": 4.9,
+      "conversions": 42,
+      "conversionRate": 4.9,
+      "isMockData": true
+    },
+    "analysis": "Bounce rate is 68.4% (threshold: 60%). The majority of visitors leave after the Hero without scrolling further, indicating the above-the-fold messaging is not resonating with the target creator audience.",
+    "hypothesis": "If we rewrite the Hero headline to lead with a concrete value outcome (revenue uplift), then bounce rate will decrease because creators respond to specific earning proof over abstract positioning.",
+    "bottleneck": "Bounce Rate",
+    "changedElement": "Hero copy",
+    "gitCommit": "CRO: Update Hero copy to optimize Bounce Rate [hero-v2]",
+    "commitSha": "",
+    "beforeScreenshotUrl": "/screenshots/run-1775244475075-before.jpg",
+    "afterScreenshotUrl": ""
   }
 ]
