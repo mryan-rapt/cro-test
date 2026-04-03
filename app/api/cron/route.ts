@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchYesterdayMetrics } from '@/lib/posthog';
 import { runCROEngine, type PageConfig } from '@/lib/cro-engine';
 import { getFile, commitMultipleFiles } from '@/lib/github';
-import { captureScreenshotBase64 } from '@/lib/screenshot';
+import { captureScreenshotBase64, type ScreenshotResult } from '@/lib/screenshot';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -41,10 +41,10 @@ async function runCROCycle() {
 
     // 3. Take BEFORE screenshot (raw bytes → base64)
     console.log('[CRO] Capturing before screenshot...');
-    const beforeBase64 = await captureScreenshotBase64(siteUrl);
+    const beforeResult: ScreenshotResult = await captureScreenshotBase64(siteUrl);
     const entryId = `run-${Date.now()}`;
     const beforePath = `public/screenshots/${entryId}-before.jpg`;
-    const beforeUrl = beforeBase64 ? `/screenshots/${entryId}-before.jpg` : '';
+    const beforeUrl = beforeResult.base64 ? `/screenshots/${entryId}-before.jpg` : '';
 
     // 4. Run CRO engine
     const decision = runCROEngine(metrics, currentConfig);
@@ -73,8 +73,8 @@ async function runCROCycle() {
       { path: 'page-config.json', content: JSON.stringify(decision.newConfig, null, 2) },
       { path: 'cro-timeline.json', content: JSON.stringify(updatedTimeline, null, 2) },
     ];
-    if (beforeBase64) {
-      filesToCommit.push({ path: beforePath, content: beforeBase64, encoding: 'base64' });
+    if (beforeResult.base64) {
+      filesToCommit.push({ path: beforePath, content: beforeResult.base64, encoding: 'base64' });
     }
 
     const commitSha = await commitMultipleFiles(filesToCommit, decision.gitCommit);
@@ -85,9 +85,9 @@ async function runCROCycle() {
 
     // 8. Take AFTER screenshot
     console.log('[CRO] Capturing after screenshot...');
-    const afterBase64 = await captureScreenshotBase64(siteUrl);
+    const afterResult: ScreenshotResult = await captureScreenshotBase64(siteUrl);
     const afterPath = `public/screenshots/${entryId}-after.jpg`;
-    const afterUrl = afterBase64 ? `/screenshots/${entryId}-after.jpg` : '';
+    const afterUrl = afterResult.base64 ? `/screenshots/${entryId}-after.jpg` : '';
 
     // 9. Update timeline entry with commitSha + after screenshot URL
     const finalEntry = { ...newEntry, commitSha, afterScreenshotUrl: afterUrl };
@@ -98,8 +98,8 @@ async function runCROCycle() {
     const screenshotFiles: Array<{ path: string; content: string; encoding?: 'utf-8' | 'base64' }> = [
       { path: 'cro-timeline.json', content: JSON.stringify(finalTimeline, null, 2) },
     ];
-    if (afterBase64) {
-      screenshotFiles.push({ path: afterPath, content: afterBase64, encoding: 'base64' });
+    if (afterResult.base64) {
+      screenshotFiles.push({ path: afterPath, content: afterResult.base64, encoding: 'base64' });
     }
 
     await commitMultipleFiles(
@@ -119,7 +119,12 @@ async function runCROCycle() {
       hypothesis: decision.hypothesis,
       gitCommit: decision.gitCommit,
       commitSha,
-      screenshotsCapured: { before: !!beforeBase64, after: !!afterBase64 },
+      screenshots: {
+        before: !!beforeResult.base64,
+        beforeError: beforeResult.error,
+        after: !!afterResult.base64,
+        afterError: afterResult.error,
+      },
       metrics,
     });
   } catch (err) {

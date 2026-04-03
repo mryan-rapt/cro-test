@@ -16,17 +16,20 @@ function buildSignedUrl(params: Record<string, string>, secret: string): string 
   return `${SCREENSHOT_API}?${sorted}&signature=${signature}`;
 }
 
+export interface ScreenshotResult {
+  base64: string | null;
+  error: string | null;
+}
+
 /**
  * Takes a screenshot and returns the raw JPEG bytes as a base64 string.
- * Returns null on failure so the caller can decide how to handle it.
  */
-export async function captureScreenshotBase64(url: string): Promise<string | null> {
+export async function captureScreenshotBase64(url: string): Promise<ScreenshotResult> {
   const accessKey = process.env.SCREENSHOT_ONE_ACCESS_KEY;
   const secret = process.env.SCREENSHOT_ONE_SECRET;
 
   if (!accessKey || !secret) {
-    console.warn('[Screenshot] Credentials not configured');
-    return null;
+    return { base64: null, error: 'SCREENSHOT_ONE credentials not set' };
   }
 
   const params: Record<string, string> = {
@@ -37,9 +40,7 @@ export async function captureScreenshotBase64(url: string): Promise<string | nul
     viewport_height: '800',
     full_page: 'false',
     image_quality: '80',
-    delay: '3',
-    block_ads: 'true',
-    block_cookie_banners: 'true',
+    delay: '2',
   };
 
   const apiUrl = buildSignedUrl(params, secret);
@@ -49,21 +50,26 @@ export async function captureScreenshotBase64(url: string): Promise<string | nul
 
     if (!res.ok) {
       const body = await res.text();
-      console.error(`[Screenshot] API error ${res.status}:`, body);
-      return null;
+      const msg = `ScreenshotOne ${res.status}: ${body.slice(0, 200)}`;
+      console.error('[Screenshot]', msg);
+      return { base64: null, error: msg };
     }
 
     const contentType = res.headers.get('content-type') ?? '';
     if (!contentType.includes('image/')) {
       const body = await res.text();
-      console.error('[Screenshot] Unexpected content-type:', contentType, body.slice(0, 200));
-      return null;
+      const msg = `Unexpected content-type "${contentType}": ${body.slice(0, 200)}`;
+      console.error('[Screenshot]', msg);
+      return { base64: null, error: msg };
     }
 
     const buffer = await res.arrayBuffer();
-    return Buffer.from(buffer).toString('base64');
+    const base64 = Buffer.from(buffer).toString('base64');
+    console.log(`[Screenshot] Captured ${buffer.byteLength} bytes for ${url}`);
+    return { base64, error: null };
   } catch (err) {
-    console.error('[Screenshot] Request failed:', err);
-    return null;
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[Screenshot] Request failed:', msg);
+    return { base64: null, error: msg };
   }
 }
